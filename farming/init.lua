@@ -16,6 +16,10 @@ dofile(farming.path .. "/nodes.lua")
 dofile(farming.path .. "/hoes.lua")
 
 
+--variables
+	local wheatSize = 8
+
+
 -- Wheat
 
 farming.register_plant("farming:wheat", {
@@ -23,7 +27,7 @@ farming.register_plant("farming:wheat", {
 	harvest_description = S("Wheat"),
 	paramtype2 = "meshoptions",
 	inventory_image = "farming_wheat_seed.png",
-	steps = 8,
+	steps = wheatSize,
 	minlight = 13,
 	maxlight = default.LIGHT_MAX,
 	fertility = {"grassland"},
@@ -65,7 +69,7 @@ farming.register_plant("farming:hemp", {
 	harvest_description = S("Bud"),
 	paramtype2 = "meshoptions",
 	inventory_image = "farming_hemp_seed.png",
-	steps = 8,
+	steps = wheatSize,
 	minlight = 13,
 	maxlight = default.LIGHT_MAX,
 	fertility = {"grassland"},
@@ -75,28 +79,27 @@ farming.register_plant("farming:hemp", {
 
 minetest.register_craftitem("farming:grinded_weed", {
 	description = S("Grinded Weed"),
-	inventory_image = "farming_flour.png",
+	inventory_image = "farming_grinded_bud.png",
 	groups = {food_flour = 1, flammable = 1},
 })
 
-minetest.register_craftitem("farming:bud", {
-	description = S("Bud"),
-	inventory_image = "farming_hemp.png",
+minetest.register_craftitem("farming:joint", {
+	description = S("Joint"),
+	inventory_image = "farming_joint.png",
 	on_use = minetest.item_eat(5),
 	groups = {food_bread = 1, flammable = 2},
 })
 
 minetest.register_craft({
 	type = "shapeless",
-	output = "farming:flour",
-	recipe = {"farming:hemp", "farming:hemp", "farming:hemp", "farming:hemp"}
+	output = "farming:grinded_weed 3",
+	recipe = {"farming:hemp", "farming:hemp"}
 })
 
 minetest.register_craft({
-	type = "cooking",
-	cooktime = 15,
-	output = "farming:bread",
-	recipe = "farming:flour"
+	type = "shapeless",
+	output = "farming:joint",
+	recipe = {"farming:grinded_weed","default:paper"}
 })
 
 
@@ -196,6 +199,12 @@ minetest.register_craft({
 
 minetest.register_craft({
 	type = "fuel",
+	recipe = "farming:hemp",
+	burntime = 2,
+})
+
+minetest.register_craft({
+	type = "fuel",
 	recipe = "farming:hoe_wood",
 	burntime = 5,
 })
@@ -207,7 +216,26 @@ if minetest.global_exists("dungeon_loot") then
 	dungeon_loot.register({
 		{name = "farming:string", chance = 0.5, count = {1, 8}},
 		{name = "farming:wheat", chance = 0.5, count = {2, 5}},
+		{name = "farming:seed_cotton", chance = 0.4, count = {1, 4}},
 		{name = "farming:seed_cotton", chance = 0.4, count = {1, 4},
 			types = {"normal"}},
 	})
 end
+
+-- Funktion zur Überprüfung, ob ein Seil über der Pflanze ist
+local function check_rope_above(pos, nodename)
+    local above_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
+    local above_node = minetest.get_node(above_pos)
+
+    minetest.log(above_node.name)
+    if above_node.name == "farming:seed_wheat" then
+     
+    end
+end
+
+-- Registrieren einer on_placenode-Rückruffunktion für Pflanzenknoten
+minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
+	if (newnode.name == "default:fence_acacia_wood") then
+        check_rope_above(pos, newnode.name)
+	end
+end)
