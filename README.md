@@ -1,6 +1,6 @@
 # christmas
 
-this modpack is designed to turn Minecraft in a more Christmas like style with some of the best mods of all time.
+this modpack is designed to turn Minetest in a more Christmas like style with some of the best mods of all time.
 
 all original license files and readmes still available.
 only changed things on top or graphically, so please mention that mopst of the work was done by others.
