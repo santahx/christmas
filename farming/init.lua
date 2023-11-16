@@ -175,6 +175,68 @@ minetest.register_craft({
 	}
 })
 
+-- olivebush
+
+--Plant registration
+farming.register_plant("farming:olivebush", {
+	description = S("olivebush Seed"),
+	harvest_description = S("Olive"),
+	inventory_image = "farming_olivebush_seed.png",
+	steps = 8,
+	minlight = 13,
+	maxlight = default.LIGHT_MAX,
+	fertility = {"grassland", "desert"},
+	groups = {flammable = 4},
+})
+
+--Register Decoration 
+minetest.register_decoration({
+	name = "farming:olivebush_wild",
+	deco_type = "simple",
+	place_on = {"default:dry_dirt_with_dry_grass"},
+	sidelen = 16,
+	--Platzierungs Parameter
+	noise_params = {
+		offset = -0.1,
+		scale = 0.1,
+		spread = {x = 50, y = 50, z = 50},
+		seed = 4242,
+		octaves = 3,
+		persist = 0.7
+	},
+	-- Biome
+	biomes = {"savanna"},
+	y_max = 31000,
+	y_min = 1,
+	decoration = "farming:olivebush_wild",
+})
+
+
+--Register Item string
+minetest.register_craftitem("farming:string", {
+	description = S("String"),
+	inventory_image = "farming_string.png",
+	groups = {flammable = 2},
+})
+
+--Register Craft Recipe whool
+minetest.register_craft({
+	output = "wool:white",
+	recipe = {
+		{"farming:olivebush", "farming:olivebush"},
+		{"farming:olivebush", "farming:olivebush"},
+	}
+})
+
+--Register Craft Recipe string
+minetest.register_craft({
+	output = "farming:string 2",
+	recipe = {
+		{"farming:olivebush"},
+		{"farming:olivebush"},
+	}
+})
+
 
 -- Straw
 
@@ -206,10 +268,10 @@ minetest.register_craft({
 	burntime = 1,
 })
 
---Cotton
+--olivebush
 minetest.register_craft({
 	type = "fuel",
-	recipe = "farming:cotton",
+	recipe = "farming:olivebush",
 	burntime = 1,
 })
 
@@ -241,8 +303,8 @@ if minetest.global_exists("dungeon_loot") then
 	dungeon_loot.register({
 		{name = "farming:string", chance = 0.5, count = {1, 8}},
 		{name = "farming:wheat", chance = 0.5, count = {2, 5}},
-		{name = "farming:seed_cotton", chance = 0.4, count = {1, 4}},
-		{name = "farming:seed_cotton", chance = 0.4, count = {1, 4},
+		{name = "farming:seed_olivebush", chance = 0.4, count = {1, 4}},
+		{name = "farming:seed_olivebush", chance = 0.4, count = {1, 4},
 			types = {"normal"}},
 	})
 end
