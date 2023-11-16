@@ -94,7 +94,7 @@ minetest.register_craftitem("farming:grinded_weed", {
 minetest.register_craftitem("farming:joint", {
 	description = S("Joint"),
 	inventory_image = "farming_joint.png",
-	on_use = minetest.item_eat(5),
+	on_use = minetest.item_eat(0),
 	groups = {food_bread = 1, flammable = 2},
 })
 
