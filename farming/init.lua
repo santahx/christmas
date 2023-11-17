@@ -422,7 +422,13 @@ local function check_rope_under(pos, nodename)
     local under_node = minetest.get_node(under_pos)
 
     --checks if a wheat seed is under it
-    if under_node.name == "farming:seed_wheat" then
+    if (under_node.name == 
+	"farming:seed_wheat") or
+	(under_node.name ==
+	"farming:seed_hemp") or
+	(under_node.name ==
+	"farming:seed_olivebush")
+	then
 
 		--gives a log outpoot when detected
     	minetest.log("detected")
@@ -473,9 +479,16 @@ minetest.register_node("farming:oilextractor", {
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
         -- Funktion wird aufgerufen, wenn ein Gegenstand in das Inventar gelegt wird
         -- Hier können Sie die Logik für das Schmelzen von Gegenständen hinzufügen
-        if listname == "input" then
+        if listname == "input"
+		 then
             local meta = minetest.get_meta(pos)
-            meta:set_string("infotext", "Oil Extractor arbeitet\n zum abbauen Spizhacke nutzen.")
+            meta:set_string("infotext", "Oil Extractor rohstoff bereit \n zum abbauen Spizhacke nutzen.")
+            -- Hier können Sie die Schmelzlogik implementieren
+        end
+		if listname == "fuel"
+		 then
+            local meta = minetest.get_meta(pos)
+            meta:set_string("infotext", "Oil Extractor brennstoff bereit \n zum abbauen Spizhacke nutzen.")
             -- Hier können Sie die Schmelzlogik implementieren
         end
     end,
@@ -485,30 +498,34 @@ minetest.register_node("farming:oilextractor", {
 minetest.register_craft({
     output = "farming:oilextractor",
     recipe = {
-        {"default:cobble", "default:cobble", "default:cobble"},
         {"default:cobble", "", "default:cobble"},
+        {"default:cobble", "default:furnace", "default:cobble"},
         {"default:cobble", "default:cobble", "default:cobble"},
     },
 })
 
--- Ereignisregistrierung für das Punsch des Ofens
+-- Ereignisregistrierung für den Punsch des Ofens
 minetest.register_on_punchnode(function(pos, node, puncher)
     if node.name == "farming:oilextractor" then
         local meta = minetest.get_meta(pos)
         local inv = meta:get_inventory()
         
         -- Überprüfe, ob der Ofen Gegenstände im Eingabeinventar hat
-        if not inv:is_empty("input") then
-            -- Füge hier die Logik für das Schmelzen von Gegenständen hinzu
+        if not inv:is_empty("input") and 
+		not inv:is_empty("fuel")
+		then
+			meta:set_string("infotext", "Oil Extractor arbeitet\n zum abbauen Spizhacke nutzen.")
             -- In diesem Beispiel wird der Gegenstand einfach ins Ausgabeinventar verschoben
             local input_stack = inv:get_stack("input", 1)
             local output_stack = inv:get_stack("output", 1)
-            
+            local fuel_stack = inv:get_stack("fuel", 1)
          -- Im Beispiel wird der Eingangsgegenstand einfach ins Ausgabeinventar verschoben
 			local input_item = input_stack:take_item(1)  -- Item vom Input-Stack nehmen
+			fuel_stack:take_item(1)
 			output_stack:add_item(input_item)  -- Item dem Ausgabe-Stack hinzufügen
 			inv:set_stack("output", 1, output_stack)
 			inv:set_stack("input", 1, input_stack)
+			inv:set_stack("fuel", 1, fuel_stack)
         else
             meta:set_string("infotext", "Oil extractor ist leer\n zum abbauen Spizhacke nutzen.")
         end
