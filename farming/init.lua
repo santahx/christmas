@@ -2,7 +2,7 @@
 
 -- Load support for MT game translation.
 local S = minetest.get_translator("farming")
-
+local B = minetest.get_translator("bucket")
 -- Global farming namespace
 
 farming = {}
@@ -157,13 +157,12 @@ minetest.register_craftitem("farming:string", {
 	groups = {flammable = 2},
 })
 
---Register Craft Recipe whool
+--Register baking craft recipe
 minetest.register_craft({
-	output = "wool:white",
-	recipe = {
-		{"farming:cotton", "farming:cotton"},
-		{"farming:cotton", "farming:cotton"},
-	}
+	type = "cooking",
+	cooktime = 15,
+	output = "farming:bread",
+	recipe = "farming:flour"
 })
 
 --Register Craft Recipe string
@@ -174,6 +173,8 @@ minetest.register_craft({
 		{"farming:cotton"},
 	}
 })
+
+
 
 -- olivebush
 
@@ -211,32 +212,134 @@ minetest.register_decoration({
 	decoration = "farming:olivebush_wild",
 })
 
-
---Register Item string
-minetest.register_craftitem("farming:string", {
-	description = S("String"),
-	inventory_image = "farming_string.png",
-	groups = {flammable = 2},
+--Register Item bakedolive
+minetest.register_craftitem("farming:bakedolive", {
+	description = S("Baked Olive"),
+	inventory_image = "farming_bakedolive.png",
+	groups = {flammable = 1},
 })
 
---Register Craft Recipe whool
+--Register bake craft recipe
 minetest.register_craft({
-	output = "wool:white",
-	recipe = {
-		{"farming:olivebush", "farming:olivebush"},
-		{"farming:olivebush", "farming:olivebush"},
-	}
+	type = "cooking",
+	cooktime = 20,
+	output = "farming:bakedolive",
+	recipe = "farming:olivebush"
 })
 
 --Register Craft Recipe string
 minetest.register_craft({
-	output = "farming:string 2",
+	output = "farming:oliveoil_bucket",
 	recipe = {
 		{"farming:olivebush"},
-		{"farming:olivebush"},
+		{"group:stone"},
+		{"bucket:bucket_empty"},
 	}
 })
 
+
+--oliveoil
+
+minetest.register_node("farming:oliveoil_source", {
+	description = S("Oliveoil Source"),
+	drawtype = "liquid",
+	waving = 2,
+	tiles = {
+		{
+			name = "farming_oliveoil_source_animated.png",
+			backface_culling = false,
+			animation = {
+				type = "vertical_frames",
+				aspect_w = 16,
+				aspect_h = 16,
+				length = 2.0,
+			},
+		},
+		{
+			name = "farming_oliveoil_source_animated.png",
+			backface_culling = true,
+			animation = {
+				type = "vertical_frames",
+				aspect_w = 16,
+				aspect_h = 16,
+				length = 2.0,
+			},
+		},
+	},
+	use_texture_alpha = "blend",
+	paramtype = "light",
+	walkable = false,
+	pointable = false,
+	diggable = false,
+	buildable_to = true,
+	is_ground_content = false,
+	drop = "",
+	drowning = 1,
+	liquidtype = "source",
+	liquid_alternative_flowing = "farming:oliveoil_flowing",
+	liquid_alternative_source = "farming:oliveoil_source",
+	liquid_viscosity = 1,
+	post_effect_color = {a = 103, r = 30, g = 60, b = 90},
+	groups = {liquid = 2, cools_lava = 3},
+	sounds = default.node_sound_water_defaults(),
+})
+
+minetest.register_node("farming:oliveoil_flowing", {
+	description = S("Flowing Oliveoil"),
+	drawtype = "flowingliquid",
+	waving = 2,
+	tiles = {"farming_oliveoil.png"},
+	special_tiles = {
+		{
+			name = "farming_oliveoil_flowing_animated.png",
+			backface_culling = false,
+			animation = {
+				type = "vertical_frames",
+				aspect_w = 16,
+				aspect_h = 16,
+				length = 0.5,
+			},
+		},
+		{
+			name = "farming_oliveoil_flowing_animated.png",
+			backface_culling = true,
+			animation = {
+				type = "vertical_frames",
+				aspect_w = 16,
+				aspect_h = 16,
+				length = 0.5,
+			},
+		},
+	},
+	use_texture_alpha = "blend",
+	paramtype = "light",
+	paramtype2 = "flowingliquid",
+	walkable = false,
+	pointable = false,
+	diggable = false,
+	buildable_to = true,
+	is_ground_content = false,
+	drop = "",
+	drowning = 1,
+	liquidtype = "flowing",
+	liquid_alternative_flowing = "farming:oliveoil_flowing",
+	liquid_alternative_source = "farming:oliveoil_source",
+	liquid_viscosity = 1,
+	post_effect_color = {a = 103, r = 30, g = 60, b = 90},
+	groups = {liquid = 2, not_in_creative_inventory = 1,
+		cools_lava = 3},
+	sounds = default.node_sound_water_defaults(),
+})
+
+--Register Olive Oil bucket
+bucket.register_liquid(
+	"farming:oliveoil_source",
+	"farming:oliveoil_flowing",
+	"farming:oliveoil_bucket",
+	"bucket_oliveoil.png",
+	S("Olive Oil Bucket"),
+	{tool = 1, water_bucket = 1}
+)
 
 -- Straw
 
@@ -345,4 +448,69 @@ minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack
 		--starts the check of node under it
         check_rope_under(pos, newnode.name)
 	end
+end)
+
+-- oil extractor
+
+minetest.register_node("farming:oilextractor", {
+    description = "Oil Extractor",  -- Beschreibung im Inventar
+    tiles = {"farming_oilextractor_top.png", "farming_oilextractor_bottom.png", "farming_oilextractor_side.png"},  -- Texturen für oben, unten und Seiten
+    groups = {cracky = 2},  -- Eigenschaften des Blocks, z.B. Werkzeugbeständigkeit
+    sounds = default.node_sound_stone_defaults(),  -- Töne für den Block festlegen
+    on_construct = function(pos)
+        local meta = minetest.get_meta(pos)
+        meta:set_string("formspec", "size[8,9]"..
+            "list[current_name;input;2,1;1,1;]"..
+            "list[current_name;fuel;2,3;1,1;]"..
+            "list[current_name;output;5,2;1,1;]"..
+            "list[current_player;main;0,5;8,4;]")
+        meta:set_string("infotext", "Ofen")
+        local inv = meta:get_inventory()
+        inv:set_size("input", 1)
+        inv:set_size("fuel", 1)
+        inv:set_size("output", 1)
+    end,
+    on_metadata_inventory_put = function(pos, listname, index, stack, player)
+        -- Funktion wird aufgerufen, wenn ein Gegenstand in das Inventar gelegt wird
+        -- Hier können Sie die Logik für das Schmelzen von Gegenständen hinzufügen
+        if listname == "input" then
+            local meta = minetest.get_meta(pos)
+            meta:set_string("infotext", "Oil Extractor arbeitet\n zum abbauen Spizhacke nutzen.")
+            -- Hier können Sie die Schmelzlogik implementieren
+        end
+    end,
+})
+
+-- Handwerksrezept für den Ofen registrieren
+minetest.register_craft({
+    output = "farming:oilextractor",
+    recipe = {
+        {"default:cobble", "default:cobble", "default:cobble"},
+        {"default:cobble", "", "default:cobble"},
+        {"default:cobble", "default:cobble", "default:cobble"},
+    },
+})
+
+-- Ereignisregistrierung für das Punsch des Ofens
+minetest.register_on_punchnode(function(pos, node, puncher)
+    if node.name == "farming:oilextractor" then
+        local meta = minetest.get_meta(pos)
+        local inv = meta:get_inventory()
+        
+        -- Überprüfe, ob der Ofen Gegenstände im Eingabeinventar hat
+        if not inv:is_empty("input") then
+            -- Füge hier die Logik für das Schmelzen von Gegenständen hinzu
+            -- In diesem Beispiel wird der Gegenstand einfach ins Ausgabeinventar verschoben
+            local input_stack = inv:get_stack("input", 1)
+            local output_stack = inv:get_stack("output", 1)
+            
+         -- Im Beispiel wird der Eingangsgegenstand einfach ins Ausgabeinventar verschoben
+			local input_item = input_stack:take_item(1)  -- Item vom Input-Stack nehmen
+			output_stack:add_item(input_item)  -- Item dem Ausgabe-Stack hinzufügen
+			inv:set_stack("output", 1, output_stack)
+			inv:set_stack("input", 1, input_stack)
+        else
+            meta:set_string("infotext", "Oil extractor ist leer\n zum abbauen Spizhacke nutzen.")
+        end
+    end
 end)
